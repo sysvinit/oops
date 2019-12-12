@@ -51,7 +51,7 @@
     <dependency>
       <groupId>red.m_squa.pircbotx</groupId>
       <artifactId>pircbotx-extras</artifactId>
-      <version>1.0</version>
+      <version>1.1</version>
     </dependency>
 
     <dependency>

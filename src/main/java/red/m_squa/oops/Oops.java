@@ -48,12 +48,10 @@ import org.pircbotx.hooks.managers.SequentialListenerManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
+
+import red.m_squa.pircbotx.CallbackBotManager;
 
 import red.m_squa.oops.DBusPath;
 import red.m_squa.oops.except.BadServerName;
@@ -83,7 +81,7 @@ public class Oops implements Manager {
 
     private DBusPath path;
     private DBusConnection conn;
-    private MultiBotManager manager;
+    private CallbackBotManager manager;
     private BiMap<String, Integer> botnames;
     private Object statelock;
     private OopsState state;
@@ -96,10 +94,13 @@ public class Oops implements Manager {
         this.path = path;
 
         this.botnames = HashBiMap.create();
-        this.manager = new InternalBotManager();
         this.statelock = new Object();
         this.state = OopsState.RUNNING;
         this.latch = new CountDownLatch(1);
+
+        this.manager = new CallbackBotManager(
+            (b,v) -> this.removeBot(b, false),
+            (b,t) -> this.removeBot(b, true));
     }
 
     public void go() {
@@ -394,6 +395,47 @@ public class Oops implements Manager {
         }
     }
 
+    private void removeBot(PircBotX bot, boolean wascrash) {
+        boolean done;
+        String name;
+        DBusPath subpath;
+
+        done = false;
+        synchronized (this.statelock) {
+            name = this.botnames.inverse().remove(bot.getBotId());
+
+            if (this.state == OopsState.STOPPING &&
+                    this.botnames.size() == 0) {
+                done = true;
+            }
+        }
+
+        /* unexport object, send signal, tear down dbus connection if
+         * necessary */
+        subpath = this.path.appendPath(name);
+        log.info("Stopped server: " + name);
+
+        try {
+            this.conn.sendMessage(new Manager.ServerStopped(
+                this.path.getPath(), name, wascrash));
+
+            try {
+                Thread.sleep(Oops.UNEXPORT_DELAY);
+            } catch (InterruptedException ie) {
+                /* no recovery possible here */
+            }
+
+            this.conn.unExportObject(subpath.getPath());
+        } catch (DBusException dbe) {
+            log.error("Caught exception when sending server stop signal " +
+                      "to bus: " + dbe);
+        }
+
+        if (done) {
+            this.latch.countDown();
+        }
+    }
+
     public static void main(String[] args) {
         File dir;
         DBusConnection conn;
@@ -461,87 +503,5 @@ public class Oops implements Manager {
         log.debug("Disconnected from bus");
 
         System.exit(0);
-    }
-
-    private class InternalBotManager extends MultiBotManager {
-        public InternalBotManager() {
-            super();
-        }
-
-        /* adapted from PircBotX sources */
-        @Override
-        protected ListenableFuture<Void> startBot(final PircBotX bot) {
-            Preconditions.checkNotNull(bot, "Bot cannot be null");
-            ListenableFuture<Void> future = botPool.submit(new BotRunner(bot));
-            synchronized (runningBotsLock) {
-                runningBots.put(bot, future);
-                runningBotsNumbers.put(bot, bot.getBotId());
-            }
-            Futures.addCallback(future, new CallbackHack(bot), MoreExecutors.directExecutor());
-            return future;
-        }
-
-
-        private class CallbackHack extends MultiBotManager.BotFutureCallback {
-            public CallbackHack(final PircBotX bot) {
-                super(bot);
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-                log.debug("Bot #" + bot.getBotId() + " finished");
-                remove(false);
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                log.error("Bot exited with Exception", t);
-                remove(true);
-            }
-
-            private void remove(boolean wascrash) {
-                boolean done;
-                String name;
-                DBusPath subpath;
-                super.remove();
-
-                done = false;
-                synchronized (Oops.this.statelock) {
-                    name = Oops.this.botnames.inverse().remove(
-                        this.bot.getBotId());
-
-                    if (Oops.this.state == OopsState.STOPPING &&
-                            Oops.this.botnames.size() == 0) {
-                        done = true;
-                    }
-                }
-
-                /* unexport object, send signal, tear down dbus connection */
-                subpath = Oops.this.path.appendPath(name);
-
-                log.info("Stopped server: " + name);
-
-                try {
-                    Oops.this.conn.sendMessage(
-                        new Manager.ServerStopped(
-                            Oops.this.path.getPath(), name, wascrash));
-
-                    try {
-                        Thread.sleep(Oops.UNEXPORT_DELAY);
-                    } catch (InterruptedException ie) {
-                        /* no recovery possible here */
-                    }
-
-                    Oops.this.conn.unExportObject(subpath.getPath());
-                } catch (DBusException dbe) {
-                    log.error("Caught exception when sending server stop " +
-                            "signal to bus: " + dbe);
-                }
-
-                if (done) {
-                    Oops.this.latch.countDown();
-                }
-            }
-        }
     }
 }
