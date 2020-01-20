@@ -6,13 +6,20 @@ to multiple distinct servers are supported.
 
 ## Building
 
-Oops is implemented using Java 8, with IRC connectivity provided by
-[PircBotX](https://github.com/pircbotx/pircbotx) and DBus functionality
-provided by [dbus-java](https://github.com/hypfvieh/dbus-java). Maven is used
-for building; issue `mvn package` at the project root to create a combined JAR
-file containing all dependency code under `target/oops-unified.jar`.
+Oops is implemented in Java 8, with IRC connectivity provided by 
+[PircBotX](https://github.com/pircbotx/pircbotx) and the 
+[`pircbotx-extras`](https://github.com/sysvinit/pircbotx-extras) library, and 
+DBus functionality is provided by 
+[dbus-java](https://github.com/hypfvieh/dbus-java). Note that `pircbotx-extras` 
+must be installed manually from the git repository at time of writing. Maven is 
+used for building otherwise; issue `mvn package` at the project root to create 
+a combined JAR file containing all dependency classes under 
+`target/oops-unified.jar`.
 
-Oops is still under development, so the DBus API is not documented at this time.
+Oops is still under development, so the DBus API is not documented
+at this time, however it is presently in production use by [Adélie
+Linux](https://www.adelielinux.org) as part of their server monitoring
+infrastructure.
 
 ## Licence
 
