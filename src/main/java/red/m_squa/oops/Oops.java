@@ -62,6 +62,7 @@ import red.m_squa.oops.except.ServerExists;
 import red.m_squa.oops.except.ServerLoadError;
 import red.m_squa.oops.except.ServerNotFound;
 import red.m_squa.oops.except.ServerNotLoaded;
+import red.m_squa.oops.except.ServerStopping;
 import red.m_squa.oops.iface.Manager;
 import red.m_squa.oops.irc.ChannelOutputListener;
 import red.m_squa.oops.irc.DBusPircBotX;
@@ -184,6 +185,19 @@ public class Oops implements Manager {
         String prop, initmodes;
         String[] split;
         boolean defined;
+        boolean stopping;
+
+        stopping = false;
+        synchronized (this.statelock) {
+            if (this.state == OopsState.STOPPING) {
+                stopping = true;
+            }
+        }
+
+        if (stopping) {
+            log.warn("Attempting to load server definition into stopping manager");
+            throw new ServerStopping();
+        }
 
         log.info("Loading server definition for server: " + name);
 
@@ -327,7 +341,7 @@ public class Oops implements Manager {
             throw new ServerLoadError("could not export object to DBus");
         }
 
-        synchronized (statelock) {
+        synchronized (this.statelock) {
             log.info("Starting bot for server: " + name);
             this.manager.addBot(bot);
             this.botnames.put(name, bot.getBotId());
