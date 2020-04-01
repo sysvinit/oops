@@ -27,6 +27,7 @@ import org.pircbotx.Configuration;
 import org.pircbotx.PircBotX;
 import org.pircbotx.User;
 import org.pircbotx.exception.DaoException;
+import org.pircbotx.exception.NotReadyException;
 
 import red.m_squa.oops.DBusPath;
 import red.m_squa.oops.except.AlreadyOnChannel;
@@ -166,7 +167,21 @@ public class DBusPircBotX extends PircBotX
     }
 
     public String GetChannelMode(String channel) throws NotOnChannel {
-        return this.getChannel(channel).getMode();
+        String ret;
+        boolean done;
+
+        ret = null;
+        done = true;
+
+        do {
+            try {
+                ret = this.getChannel(channel).getMode();
+            } catch (NotReadyException nre) {
+                done = false;
+            }
+        } while (!done);
+
+        return ret;
     }
 
     public boolean ChannelContainsUser(String channel, String user)
