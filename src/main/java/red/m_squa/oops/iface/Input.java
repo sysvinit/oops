@@ -26,7 +26,7 @@ import red.m_squa.oops.except.AlreadyOnChannel;
 import red.m_squa.oops.except.NotOnChannel;
 import red.m_squa.oops.except.UserNotOnChannel;
 
-@DBusInterfaceName("red.m_squa.Oops.Server.Input")
+@DBusInterfaceName("red.m_squa.oops.Server.Input")
 public interface Input extends DBusInterface {
     public void JoinChannel(String chan)
         throws AlreadyOnChannel;

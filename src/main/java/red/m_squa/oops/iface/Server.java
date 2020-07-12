@@ -29,7 +29,7 @@ import red.m_squa.oops.except.UserNotOnChannel;
 /**
  * Interface to server connection state.
  */
-@DBusInterfaceName("red.m_squa.Oops.Server")
+@DBusInterfaceName("red.m_squa.oops.Server")
 public interface Server extends DBusInterface {
     public String[] GetChannelNames();
     public String[] GetChannelUsers(String channel)

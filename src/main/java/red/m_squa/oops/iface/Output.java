@@ -28,7 +28,7 @@ import org.freedesktop.dbus.types.UInt64;
 /**
  * Raw server output events.
  */
-@DBusInterfaceName("red.m_squa.Oops.Server.Output")
+@DBusInterfaceName("red.m_squa.oops.Server.Output")
 public interface Output extends DBusInterface {
 
     public class Connected extends DBusSignal {

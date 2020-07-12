@@ -28,7 +28,7 @@ import org.freedesktop.dbus.types.UInt64;
 /**
  * Synthetic events occuring on a channel.
  */
-@DBusInterfaceName("red.m_squa.Oops.Server.Output.Channel")
+@DBusInterfaceName("red.m_squa.oops.Server.Output.Channel")
 public interface SyntheticOutput extends DBusInterface {
 
     public class AddressedMessage extends DBusSignal {
