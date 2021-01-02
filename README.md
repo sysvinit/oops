@@ -16,10 +16,10 @@ used for building otherwise; issue `mvn package` at the project root to create
 a combined JAR file containing all dependency classes under
 `target/oops-unified.jar`.
 
-Oops is still under development, so the DBus API is not documented
-at this time, however it is presently in production use by [Adélie
-Linux](https://www.adelielinux.org) as part of their server monitoring
-infrastructure.
+The DBus API is not documented at this time. Oops was originally developed
+for use as part of the [Adélie Linux](https://www.adelielinux.org) project's
+monitoring infrastructure, however as I'm no longer contributing to Adélie,
+I haven't done any work on Oops since then.
 
 ## Licence
 
