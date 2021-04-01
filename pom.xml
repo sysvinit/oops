@@ -57,13 +57,13 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>27.0-jre</version>
+      <version>30.0-jre</version>
     </dependency>
 
     <dependency>
       <groupId>com.github.hypfvieh</groupId>
       <artifactId>dbus-java</artifactId>
-      <version>3.2.0</version>
+      <version>3.3.0</version>
     </dependency>
   </dependencies>
 
