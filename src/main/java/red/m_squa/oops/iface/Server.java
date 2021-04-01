@@ -31,6 +31,7 @@ import red.m_squa.oops.except.UserNotOnChannel;
  */
 @DBusInterfaceName("red.m_squa.oops.Server")
 public interface Server extends DBusInterface {
+    public String GetNick();
     public String[] GetChannelNames();
     public String[] GetChannelUsers(String channel)
         throws NotOnChannel;

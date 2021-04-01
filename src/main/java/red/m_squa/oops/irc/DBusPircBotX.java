@@ -155,6 +155,10 @@ public class DBusPircBotX extends PircBotX
     }
 
     /* Server interface implementation */
+    public String GetNick() {
+        return this.getNick();
+    }
+
     public String[] GetChannelNames() {
         return this.userChannelDao.getAllChannels()
             .stream().map(c -> c.getName())
